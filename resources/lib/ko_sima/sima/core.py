@@ -14,14 +14,14 @@ from .config import Config
 
 MODULE_NAME = "sima"
 addon_base_path = xbmcvfs.translatePath(xbmcaddon.Addon().getAddonInfo('path'))
-mpd_sima_path = path.join(addon_base_path, 'lib', 'mpd-sima', 'sima', '__init__.py')
+mpd_sima_path = path.join(addon_base_path, 'resources', 'lib', 'mpd-sima', 'sima', '__init__.py')
 xbmc.log(mpd_sima_path)
 spec = importlib.util.spec_from_file_location(MODULE_NAME, mpd_sima_path)
 mpdSima = importlib.util.module_from_spec(spec)
 sys.modules[MODULE_NAME] = mpdSima
 
 MUSICPD_MODULE_NAME = 'musicpd'
-musicpd_path = path.join(addon_base_path, 'lib', 'ko_sima', 'sima', 'mpd_stubs', 'musicpd.py')
+musicpd_path = path.join(addon_base_path, 'resources', 'lib', 'ko_sima', 'sima', 'mpd_stubs', 'musicpd.py')
 musicpd_spec = importlib.util.spec_from_file_location(MUSICPD_MODULE_NAME, musicpd_path)
 musicpd = importlib.util.module_from_spec(musicpd_spec)
 sys.modules[MUSICPD_MODULE_NAME] = musicpd
@@ -155,7 +155,7 @@ class KoSima:
                            len(queue), queue_trigger)
         else:
             queue = self.player.queue
-            self.log.debug('Currently %s track(s) ahead. (target %s)', len(queue), queue_trigger)
+            self.log.debug('Currently %s track(s) ahead. (target %s)', (len(queue), queue_trigger))
         if len(queue) < queue_trigger:
             return True
         return False

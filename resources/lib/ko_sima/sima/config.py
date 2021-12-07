@@ -6,10 +6,10 @@ class Config:
         self.addon = xbmcaddon.Addon()
 
     def get(self, module, setting):
-        self.addon.getSetting('.'.join([module, setting]))
+        return self.addon.getSetting('.'.join([module, setting]))
 
     def getint(self, module, setting):
-        self.addon.getSettingInt('.'.join([module, setting]))
+        return self.addon.getSettingInt('.'.join([module, setting]))
 
     def __getitem__(self, item):
         splitted = item.split('.')
