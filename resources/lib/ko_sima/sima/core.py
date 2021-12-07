@@ -11,14 +11,16 @@ from .player_client import PlayerClient, PlayerError
 from collections import deque
 from .log import Log
 from .config import Config
+import web_pdb
 
 MODULE_NAME = "sima"
 addon_base_path = xbmcvfs.translatePath(xbmcaddon.Addon().getAddonInfo('path'))
 mpd_sima_path = path.join(addon_base_path, 'resources', 'lib', 'mpd-sima', 'sima', '__init__.py')
 xbmc.log(mpd_sima_path)
-spec = importlib.util.spec_from_file_location(MODULE_NAME, mpd_sima_path)
-mpdSima = importlib.util.module_from_spec(spec)
+sima_spec = importlib.util.spec_from_file_location(MODULE_NAME, mpd_sima_path)
+mpdSima = importlib.util.module_from_spec(sima_spec)
 sys.modules[MODULE_NAME] = mpdSima
+sima_spec.loader.exec_module(mpdSima)
 
 MUSICPD_MODULE_NAME = 'musicpd'
 musicpd_path = path.join(addon_base_path, 'resources', 'lib', 'ko_sima', 'sima', 'mpd_stubs', 'musicpd.py')
@@ -32,6 +34,7 @@ from sima.plugins.core.history import History
 from sima.plugins.core.mpdoptions import MpdOptions
 from sima.plugins.core.uniq import Uniq
 from sima.lib.simadb import SimaDB
+from sima.lib.track import Track
 
 
 def load_plugins(sima, source):
@@ -39,11 +42,10 @@ def load_plugins(sima, source):
         sima:   sima.core.Sima instance
         source: ['internal', 'contrib']
     """# pylint: disable=logging-not-lazy,logging-format-interpolation
-    if not sima.config.get('sima', source):
-        return
+
     logger = sima.log
     # TODO: Sanity check for "sima.config.get('sima', source)" ?
-    for plugin in sima.config.get('sima', source).split(','):
+    for plugin in sima.get_plugins(source):
         plugin = plugin.strip(' \n')
         module = f'sima.plugins.{source}.{plugin.lower()}'
         try:
@@ -52,11 +54,11 @@ def load_plugins(sima, source):
             logger.error(f'Failed to load "{plugin}" plugin\'s module: ' +
                          f'{module} ({err})')
             sima.shutdown()
-            sys.exit(1)
+            return
         try:
             plugin_obj = getattr(mod_obj, plugin)
         except AttributeError as err:
-            logger.error('Failed to load plugin %s (%s)', plugin, err)
+            logger.error('Failed to load plugin %s (%s)', (plugin, err))
             sima.shutdown()
             sys.exit(1)
         logger.info('Loading {0} plugin: {name} ({doc})'.format(
@@ -79,7 +81,6 @@ class KoSima:
 
         db_file = path.join(profile_path, 'ko_sima.db')
         if not isfile(db_file):
-
             self.log.debug('Creating database in "%s"', db_file)
             SimaDB(db_path=db_file).create_db()
 
@@ -88,11 +89,24 @@ class KoSima:
         self.config = Config()
         self._plugins = []
         self._core_plugins = []
-        self.player = PlayerClient(self.config)
+        self.player = PlayerClient(self)
         self.short_history = deque(maxlen=60)
         self.changed = None
         self.xbmc_monitor = xbmc.Monitor()
         self.is_exiting = False
+
+    def get_item_as_track(self, music_info):
+        track = Track(file=music_info.getURL(), duration=music_info.getDuration())
+        track.artist = music_info.getArtist()
+        track.title = music_info.getTitle()
+        track.album = music_info.getAlbum()
+        track.albumartist = music_info.getAlbumArtist()
+        track.genre = music_info.getGenre()
+        track.musicbrainz_artistid = music_info.getMusicBrainzArtistID()
+        track.musicbrainz_albumartistid = music_info.getMusicBrainzAlbumArtistID()
+        track.musicbrainz_albumid = music_info.getMusicBrainzAlbumID()
+        track.musicbrainz_trackid = music_info.getMusicBrainzTrackID()
+        return track
 
     def load_plugins(self):
         # required core plugins
@@ -143,6 +157,12 @@ class KoSima:
         return [plugin[1] for plugin in
                 sorted(self._plugins, key=lambda pl: pl[0], reverse=True)]
 
+    def get_plugins(self, source):
+        if source == 'internal':
+            return ['Crop', 'Genre', 'Lastfm', 'Random']
+        if source == 'contrib':
+            return []
+
     def need_tracks(self):
         """Is the player in need for tracks"""
         if not self.enabled:
@@ -164,6 +184,7 @@ class KoSima:
         to_add = []
         for plugin in self.plugins:
             self.log.debug('callback_need_track: %s', plugin)
+            web_pdb.set_trace()
             pl_candidates = getattr(plugin, 'callback_need_track')()
             if pl_candidates:
                 to_add.extend(pl_candidates)

@@ -7,6 +7,6 @@
   <extension point="xbmc.service" library="service.py" />
   <extension point="xbmc.addon.metadata">
     <platform>all</platform>
-    <summary lang="en"></summary>
+    <summary lang="en">Ko-Sima can queue track, top track or whole album for similar artists. This client allows you to never run out of music when your playlist queue is getting short.</summary>
   </extension>
 </addon>

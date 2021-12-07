@@ -17,17 +17,4 @@ msgstr ""
 
 msgctxt "#32001"
 msgid "core"
-msgstr "Grundeinstellungen"
-
-msgctxt "#32010"
-msgid "sima.plugin.genre.queue_mode"
-msgstr "Einreihmodus"
-
-msgctxt "#32011"
-msgid "sima.plugin.genre.queue_mode.track"
-msgstr "einzelner Track"
-
-
-msgctxt "#32012"
-msgid "sima.plugin.genre.queue_mode.track"
-msgstr "gesamtes Album"
+msgstr "Basic settings"
