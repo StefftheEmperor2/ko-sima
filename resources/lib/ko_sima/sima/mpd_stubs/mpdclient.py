@@ -1,0 +1,2 @@
+class PlayerError:
+    pass

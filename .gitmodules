@@ -1,0 +1,3 @@
+[submodule "resources/lib/mpd-sima"]
+	path = resources/lib/mpd-sima
+	url = git@github.com:mxjeff/mpd-sima.git
