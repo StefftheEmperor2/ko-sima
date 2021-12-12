@@ -19,6 +19,38 @@ msgctxt "#32001"
 msgid "core"
 msgstr "Grundeinstellungen"
 
+msgctxt "#32002"
+msgid "sima.queue_length"
+msgstr "Länge der Warteschlange"
+
+msgctxt "#32003"
+msgid "sima.history_duration"
+msgstr "Länge der Historie"
+
+msgctxt "#32004"
+msgid "sima.musicbrainzid"
+msgstr "MusicBrainzIdentifier nutzen"
+
+msgctxt "#32005"
+msgid "sima.repeat_disable_queue"
+msgstr "Wiederholen-Modus deaktiviert Einreihen"
+
+msgctxt "#32006"
+msgid "sima.single_disable_queue"
+msgstr "Einzelliedwiederholung deaktiviert Einreihen"
+
+msgctxt "#32007"
+msgid "plugins"
+msgstr "Plugin-Einstellugnen"
+
+msgctxt "#32008"
+msgid "sima.plugin.genre"
+msgstr "Genre"
+
+msgctxt "#32009"
+msgid "ima.plugin.genre.enabled"
+msgstr "aktiviert"
+
 msgctxt "#32010"
 msgid "sima.plugin.genre.queue_mode"
 msgstr "Einreihmodus"
@@ -27,7 +59,163 @@ msgctxt "#32011"
 msgid "sima.plugin.genre.queue_mode.track"
 msgstr "einzelner Track"
 
-
 msgctxt "#32012"
-msgid "sima.plugin.genre.queue_mode.track"
+msgid "sima.plugin.genre.queue_mode.album"
 msgstr "gesamtes Album"
+
+msgctxt "#32013"
+msgid "sima.plugin.genre.single_album"
+msgstr "Hinzufügen mehrerer Lieder aus einem einzigen Album unterbinden"
+
+msgctxt "#32014"
+msgid "sima.plugin.genre.track_to_add"
+msgstr "Anzahl der hinzuzufügenden Lieder"
+
+msgctxt "#32015"
+msgid "sima.plugin.genre.album_to_add"
+msgstr "Anzahl der hinzuzufügenden Alben"
+
+msgctxt "#32016"
+msgid "sima.plugin.crop"
+msgstr "Zuschneiden"
+
+msgctxt "#32017"
+msgid "ima.plugin.crop.enabled"
+msgstr "aktiviert"
+
+msgctxt "#32018"
+msgid "sima.plugin.crop.consume"
+msgstr "vergangene Lieder in der Playlist lassen"
+
+msgctxt "#32019"
+msgid "sima.plugin.random"
+msgstr "Zufällige Lieder"
+
+msgctxt "#32020"
+msgid "sima.plugin.random.enabled"
+msgstr "aktiviert"
+
+msgctxt "#32021"
+msgid "sima.plugin.random.flavour"
+msgstr "Modus"
+
+msgctxt "#32022"
+msgid "sima.plugin.random.flavour.pure"
+msgstr "komplett zufällig"
+
+msgctxt "#32023"
+msgid "sima.plugin.random.flavour.sensible"
+msgstr "anhand der Historie"
+
+msgctxt "#32024"
+msgid "sima.plugin.random.track_to_add"
+msgstr "Anzahl der zu hinzufügenden Lieder"
+
+msgctxt "#32025"
+msgid "sima.plugin.lastfm"
+msgstr "Last-FM"
+
+msgctxt "#32026"
+msgid "ima.plugin.lastfm.enabled"
+msgstr "aktiviert"
+
+msgctxt "#32027"
+msgid "sima.plugin.lastfm.queue_mode"
+msgstr "Hinzufüge-Modus"
+
+msgctxt "#32028"
+msgid "sima.plugin.lastfm.queue_mode.track"
+msgstr "einzelner Track"
+
+msgctxt "#32029"
+msgid "sima.plugin.lastfm.queue_mode.top"
+msgstr "beliebtester Track"
+
+msgctxt "#32030"
+msgid "sima.plugin.lastfm.queue_mode.album"
+msgstr "gesamtes Album"
+
+msgctxt "#32031"
+msgid "sima.plugin.lastfm.max_art"
+msgstr "maximale Anzahl Künstler"
+
+msgctxt "#32032"
+msgid "sima.plugin.lastfm.depth"
+msgstr "Tiefe der Suche"
+
+msgctxt "#32033"
+msgid "sima.plugin.lastfm.single_album"
+msgstr "Hinzufügen mehrerer Lieder aus einem einzigen Album unterbinden"
+
+msgctxt "#32034"
+msgid "sima.plugin.lastfm.track_to_add"
+msgstr "Anzahl der hinzuzufügenden Lieder"
+
+msgctxt "#32035"
+msgid "sima.plugin.lastfm.album_to_add"
+msgstr "Anzahl der zu holenden Alben"
+
+msgctxt "#32036"
+msgid "sima.plugin.lastfm.track_to_add_from_album"
+msgstr "Anzahl der hinzuzufügenden Lieder pro Album"
+
+msgctxt "#32037"
+msgid "sima.plugin.lastfm.shuffle_album"
+msgstr "Alben durcheinanderwürfeln"
+
+msgctxt "#32038"
+msgid "sima.plugin.lastfm.cache"
+msgstr "Cache aktivieren"
+
+msgctxt "#32039"
+msgid "sima.plugin.tags.enabled"
+msgstr "aktiviert"
+
+msgctxt "#32040"
+msgid "sima.plugin.tags.comment"
+msgstr "Kommentar"
+
+msgctxt "#32041"
+msgid "sima.plugin.tags.date"
+msgstr "Erscheinungsdatum"
+
+msgctxt "#32042"
+msgid "sima.plugin.tags.genre"
+msgstr "Genre"
+
+msgctxt "#32043"
+msgid "sima.plugin.tags.label"
+msgstr "Label/Publisher"
+
+msgctxt "#32044"
+msgid "sima.plugin.tags.originaldate"
+msgstr "ursprüngliches Erscheinungsdatum"
+
+msgctxt "#32045"
+msgid "sima.plugin.tags.filter"
+msgstr "Filter"
+
+msgctxt "#32046"
+msgid "sima.plugin.tags.queue_mode"
+msgstr "Hinzufüge-Modus"
+
+msgctxt "#32047"
+msgid "sima.plugin.tags.queue_mode.track"
+msgstr "einzelner Track"
+
+msgctxt "#32048"
+msgid "sima.plugin.tags.queue_mode.album"
+msgstr "gesamtes Album"
+
+msgctxt "#32049"
+msgid "sima.plugin.tags.single_album"
+msgstr "Hinzufügen mehrerer Lieder aus einem einzigen Album unterbinden"
+
+
+msgctxt "#32050"
+msgid "sima.plugin.tags.track_to_add"
+msgstr "Anzahl der hinzuzufügenden Lieder"
+
+msgctxt "#32051"
+msgid "sima.plugin.tags.album_to_add"
+msgstr "Anzahl der zu holenden Alben"

@@ -8,36 +8,25 @@ from os.path import isfile
 from os import path
 from importlib import __import__ as sima_import
 from .player_client import PlayerClient, PlayerError
+from .plugins.kodioptions import KodiOptions
 from collections import deque
 from .log import Log
 from .config import Config
+from .mpd_stubs.musicpd import Track as MPDTrack
 import web_pdb
-
-MODULE_NAME = "sima"
-addon_base_path = xbmcvfs.translatePath(xbmcaddon.Addon().getAddonInfo('path'))
-mpd_sima_path = path.join(addon_base_path, 'resources', 'lib', 'mpd-sima', 'sima', '__init__.py')
-xbmc.log(mpd_sima_path)
-sima_spec = importlib.util.spec_from_file_location(MODULE_NAME, mpd_sima_path)
-mpdSima = importlib.util.module_from_spec(sima_spec)
-sys.modules[MODULE_NAME] = mpdSima
-sima_spec.loader.exec_module(mpdSima)
-
-MUSICPD_MODULE_NAME = 'musicpd'
-musicpd_path = path.join(addon_base_path, 'resources', 'lib', 'ko_sima', 'sima', 'mpd_stubs', 'musicpd.py')
-musicpd_spec = importlib.util.spec_from_file_location(MUSICPD_MODULE_NAME, musicpd_path)
-musicpd = importlib.util.module_from_spec(musicpd_spec)
-sys.modules[MUSICPD_MODULE_NAME] = musicpd
-musicpd_spec.loader.exec_module(musicpd)
+from . import load_sima, load_musicpd
+load_sima()
+load_musicpd()
 
 # core plugins
 from sima.plugins.core.history import History
-from sima.plugins.core.mpdoptions import MpdOptions
 from sima.plugins.core.uniq import Uniq
 from sima.lib.simadb import SimaDB
 from sima.lib.track import Track
+from sima.lib.meta import Artist
 
 
-def load_plugins(sima, source):
+def load_plugin(sima, source, plugin):
     """Handles internal/external plugins
         sima:   sima.core.Sima instance
         source: ['internal', 'contrib']
@@ -45,25 +34,25 @@ def load_plugins(sima, source):
 
     logger = sima.log
     # TODO: Sanity check for "sima.config.get('sima', source)" ?
-    for plugin in sima.get_plugins(source):
-        plugin = plugin.strip(' \n')
-        module = f'sima.plugins.{source}.{plugin.lower()}'
-        try:
-            mod_obj = sima_import(module, fromlist=[plugin])
-        except ImportError as err:
-            logger.error(f'Failed to load "{plugin}" plugin\'s module: ' +
-                         f'{module} ({err})')
-            sima.shutdown()
-            return
-        try:
-            plugin_obj = getattr(mod_obj, plugin)
-        except AttributeError as err:
-            logger.error('Failed to load plugin %s (%s)', (plugin, err))
-            sima.shutdown()
-            sys.exit(1)
-        logger.info('Loading {0} plugin: {name} ({doc})'.format(
-            source, **plugin_obj.info()))
-        sima.register_plugin(plugin_obj)
+
+    plugin = plugin.strip(' \n')
+    module = f'sima.plugins.{source}.{plugin.lower()}'
+    try:
+        mod_obj = sima_import(module, fromlist=[plugin])
+    except ImportError as err:
+        logger.error(f'Failed to load "{plugin}" plugin\'s module: ' +
+                     f'{module} ({err})')
+        sima.shutdown()
+        return
+    try:
+        plugin_obj = getattr(mod_obj, plugin)
+    except AttributeError as err:
+        logger.error('Failed to load plugin %s (%s)', (plugin, err))
+        sima.shutdown()
+        sys.exit(1)
+    logger.info('Loading {0} plugin: {name} ({doc})'.format(
+        source, **plugin_obj.info()))
+    sima.register_plugin(plugin_obj)
 
 
 class KoSima:
@@ -86,8 +75,16 @@ class KoSima:
 
         self.sdb = SimaDB(db_path=db_file)
         PlayerClient.database = self.sdb
-        self.config = Config()
+        self.config = Config(self)
         self._plugins = []
+        self.available_plugins = [
+            ('internal', 'Crop'),
+            ('internal', 'Genre'),
+            ('internal', 'Lastfm'),
+            ('internal', 'Random'),
+            ('internal', 'Tags'),
+        ]
+        self.loaded_plugins = []
         self._core_plugins = []
         self.player = PlayerClient(self)
         self.short_history = deque(maxlen=60)
@@ -108,19 +105,69 @@ class KoSima:
         track.musicbrainz_trackid = music_info.getMusicBrainzTrackID()
         return track
 
+    def create_artist_by_kodi_data(self, kodi_data):
+        return Artist(
+            name=kodi_data['artist'],
+            mbid=next(iter(kodi_data['musicbrainzartistid'] or []), None),
+            albumartist=(kodi_data['artist'] if kodi_data['isalbumartist'] else None)
+        )
+
+    def create_mpd_track_by_kodi_data(self, kodi_data, genres):
+        musicbrainzartistid = next(iter(kodi_data['musicbrainzartistid'] or []), None) or None
+        musicbrainztrackid = kodi_data['musicbrainztrackid'] or None
+        artist = next(iter(kodi_data['artist'] or []), None) or None
+        albumartist = next(iter(kodi_data['albumartist'] or []), None) or None
+        genre = next(iter(genres or []), None) or None
+
+        track = MPDTrack()
+        track.title = kodi_data['title']
+        track.Album.name = kodi_data['album']
+        track.musicbrainz_albumid = kodi_data['musicbrainzalbumid'] or None
+        track.musicbrainz_artistid = musicbrainzartistid
+        track.musicbrainz_trackid = musicbrainztrackid
+        track.album = kodi_data['album']
+        track.artist = artist
+        track.albumartist = albumartist
+        track.duration = kodi_data['duration']
+        track.genre = genre
+        track.file = kodi_data['file']
+        return track
+
+    def create_song_by_kodi_data(self, kodi_data, genres):
+        artist = next(iter(kodi_data['artist'] or []), None) or None
+        albumartist = next(iter(kodi_data['albumartist'] or []), None) or None
+        musicbrainzartistid = next(iter(kodi_data['musicbrainzartistid'] or []), None) or None
+        musicbrainzalbumid = kodi_data['musicbrainzalbumid'] or None
+        musicbrainzalbumartistid = next(iter(kodi_data['musicbrainzalbumartistid'] or []), None) or None
+        musicbrainztrackid = kodi_data['musicbrainztrackid'] or None
+        genre = next(iter(genres or []), None) or None
+
+        return Track(
+            title=kodi_data['title'],
+            name=kodi_data['title'],
+            artist=artist,
+            album=kodi_data['album'],
+            musicbrainz_artistid=musicbrainzartistid,
+            musicbrainz_albumartistid=musicbrainzalbumartistid,
+            musicbrainz_albumid=musicbrainzalbumid,
+            musicbrainz_trackid=musicbrainztrackid,
+            mbid=musicbrainztrackid,
+            albumartist=albumartist,
+            file=kodi_data['file'],
+            duration=kodi_data['duration'],
+            genre=genre
+        )
+
     def load_plugins(self):
         # required core plugins
-        core_plugins = [History, MpdOptions]
+        core_plugins = [History, KodiOptions]
         for core_plugin in core_plugins:
             self.log.debug('Register core %(name)s (%(doc)s)', core_plugin.info())
             self.register_core_plugin(core_plugin)
         self.log.debug('core loaded, prioriy: %s',
                      ' > '.join(map(str, self.core_plugins)))
 
-        #  Loading internal plugins
-        load_plugins(self, 'internal')
-        #  Loading contrib plugins
-        load_plugins(self, 'contrib')
+        self.reload_config()
         self.log.info('plugins loaded, prioriy: %s', ' > '.join(map(str, self.plugins)))
 
     def add_history(self):
@@ -132,6 +179,7 @@ class KoSima:
         plgn = plugin_class(self)
         prio = int(plgn.priority)
         self._plugins.append((prio, plgn))
+        self.loaded_plugins.append(plgn)
 
     def register_core_plugin(self, plugin_class):
         """Registers core plugins"""
@@ -158,8 +206,9 @@ class KoSima:
                 sorted(self._plugins, key=lambda pl: pl[0], reverse=True)]
 
     def get_plugins(self, source):
+        web_pdb.set_trace()
         if source == 'internal':
-            return ['Crop', 'Genre', 'Lastfm', 'Random']
+            return ['Crop', 'Genre', 'Tags', 'Lastfm', 'Random']
         if source == 'contrib':
             return []
 
@@ -175,7 +224,7 @@ class KoSima:
                            len(queue), queue_trigger)
         else:
             queue = self.player.queue
-            self.log.debug('Currently %s track(s) ahead. (target %s)', (len(queue), queue_trigger))
+            self.log.debug('Currently %s track(s) ahead. (target %s)', len(queue), queue_trigger)
         if len(queue) < queue_trigger:
             return True
         return False
@@ -184,7 +233,6 @@ class KoSima:
         to_add = []
         for plugin in self.plugins:
             self.log.debug('callback_need_track: %s', plugin)
-            web_pdb.set_trace()
             pl_candidates = getattr(plugin, 'callback_need_track')()
             if pl_candidates:
                 to_add.extend(pl_candidates)
@@ -251,9 +299,38 @@ class KoSima:
 
             try:
                 self.loop()
+                if self.player.has_exited:
+                    self.shutdown()
+                    break
             except PlayerError as err:
                 self.log.warning('Player error: %s', err)
                 self.reconnect_player()
+
+    def reload_config(self):
+        web_pdb.set_trace()
+        plugins_to_enable = []
+        plugins_to_disable = []
+        enabled_plugins = []
+        for plugin in self.plugins:
+            if not self.config.get_kodi_setting_bool(f'sima.plugin.{plugin.lower()}.enabled'):
+                plugins_to_disable.append(plugin)
+            enabled_plugins.append(plugin)
+
+        for source, plugin in self.available_plugins:
+            plugin_name = plugin.lower()
+            if self.config.get_kodi_setting_bool(f'sima.plugin.{plugin_name}.enabled') \
+                    and plugin not in enabled_plugins:
+                plugins_to_enable.append((source, plugin))
+
+        for plugin in plugins_to_disable:
+            plugin.shutdown()
+            self._plugins.remove(plugin)
+
+        for source, plugin in plugins_to_enable:
+            if not plugin in self.loaded_plugins:
+                self.load_plugin(plugin)
+            plugin.start()
+            self._plugins.append(plugin)
 
     def loop(self):
         """Dispatching callbacks to plugins
@@ -264,6 +341,8 @@ class KoSima:
         else:  # Wait for a change
             self.changed = self.player.monitor()
             self.log.debug('changed: %s', ', '.join(self.changed))
+        if 'config' in self.changed:
+            self.reload_config()
         if 'playlist' in self.changed:
             self.foreach_plugin('callback_playlist')
         if 'player' in self.changed or 'options' in self.changed:
