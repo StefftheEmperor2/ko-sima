@@ -84,6 +84,7 @@ class KoSima:
             ('internal', 'Random'),
             ('internal', 'Tags'),
         ]
+        self.plugin_classes = []
         self.loaded_plugins = []
         self._core_plugins = []
         self.player = PlayerClient(self)
@@ -179,6 +180,7 @@ class KoSima:
         plgn = plugin_class(self)
         prio = int(plgn.priority)
         self._plugins.append((prio, plgn))
+        self.plugin_classes.append(plugin_class)
         self.loaded_plugins.append(plgn)
 
     def register_core_plugin(self, plugin_class):
@@ -306,6 +308,20 @@ class KoSima:
                 self.log.warning('Player error: %s', err)
                 self.reconnect_player()
 
+    def get_plugin_by_identifier_from_list(self, plugin_identifier, plugin_list):
+        source, plugin_name = plugin_identifier
+        for plugin in plugin_list:
+            if plugin.__module__ == f'sima.plugins.{source}.{plugin_name.lower()}':
+                return plugin
+        return None
+
+    def remove_plugin(self, plugin):
+        new_plugins = []
+        for prio, loaded_plugin in self._plugins:
+            if loaded_plugin is not plugin:
+                new_plugins.append((prio, loaded_plugin,))
+        self._plugins = new_plugins
+
     def reload_config(self):
         web_pdb.set_trace()
         plugins_to_enable = []
@@ -318,19 +334,22 @@ class KoSima:
 
         for source, plugin in self.available_plugins:
             plugin_name = plugin.lower()
-            if self.config.get_kodi_setting_bool(f'sima.plugin.{plugin_name}.enabled') \
-                    and plugin not in enabled_plugins:
+            if self.config.get_kodi_setting_bool(f'sima.plugin.{plugin_name}.enabled'):
+                if self.get_plugin_by_identifier_from_list((source, plugin,), enabled_plugins):
+                    plugins_to_disable.append(plugin)
                 plugins_to_enable.append((source, plugin))
 
         for plugin in plugins_to_disable:
             plugin.shutdown()
-            self._plugins.remove(plugin)
+            self.remove_plugin(plugin)
 
         for source, plugin in plugins_to_enable:
-            if not plugin in self.loaded_plugins:
-                self.load_plugin(plugin)
-            plugin.start()
-            self._plugins.append(plugin)
+            if not self.get_plugin_by_identifier_from_list((source, plugin,), self.loaded_plugins):
+                load_plugin(self, source, plugin)
+            plugin_object = self.get_plugin_by_identifier_from_list((source, plugin,), self.loaded_plugins)
+            plugin_object.start()
+            prio = int(plugin_object.priority)
+            self._plugins.append((prio, plugin_object,))
 
     def loop(self):
         """Dispatching callbacks to plugins
