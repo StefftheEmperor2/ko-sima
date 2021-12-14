@@ -160,8 +160,11 @@ class PlayerClient(MPD):
             return self.find_tracks_by_artist(mpd_filter)
         if mpd_filter is None:
             return self.find_tracks_by_filter(what)
-        # if what == 'musicbrainz_artistid':
-        #     return []
+        if what == 'musicbrainz_artistid':
+            if self.config.get_kodi_setting_bool('sima.musicbrainzid'):
+                return self.find_tracks_by_musicbrainz_artist_id(mpd_filter)
+            else:
+                return []
         web_pdb.set_trace()
 
     def find_tracks_by_artist(self, artist):
@@ -213,7 +216,6 @@ class PlayerClient(MPD):
                 search_more = False
         return songs
 
-
     def find_tracks_by_filter(self, filter_condition):
         search_more = True
         page = 0
@@ -247,6 +249,58 @@ class PlayerClient(MPD):
                 genre_ids = []
                 for song in response['result']['songs']:
                     for genre_id in song['genreid']:
+                        genre_ids.append(genre_id)
+                self.assure_genre_ids_loaded(genre_ids)
+                for song_data in response['result']['songs']:
+                    if not raw_filter or raw_filter.matches_song_data(song_data):
+                        songs.append(
+                            self.core.create_mpd_track_by_kodi_data(
+                                song_data,
+                                self.get_genres_by_ids(
+                                    song_data['genreid']
+                                )
+                            )
+                        )
+                rpc.set_page(page + 1)
+                search_more = len(response['result']['songs']) > 0 and rpc.limits.start <= \
+                              response['result']['limits']['total']
+            else:
+                self.core.log.warning('no more results in list')
+                search_more = False
+        return songs
+
+    def find_tracks_by_musicbrainz_artist_id(self, musicbrainz_artist_id):
+        search_more = True
+        page = 0
+        songs = []
+        filter_condition = f'(MUSICBRAINZ_ARTISTID = "{musicbrainz_artist_id})'
+        raw_filter = FilterParser(filter_condition)
+        kodi_filter = raw_filter.get_kodi_filter(FilterParser.SECTION_SONGS)
+        while search_more:
+            page = page + 1
+            rpc = RPC(self.core, 'AudioLibrary.GetSongs', 'libSongs')
+            rpc.set_page(page)
+            rpc.set_sort_field('title')
+            rpc.add_property('title')
+            rpc.add_property('musicbrainztrackid')
+            rpc.add_property('musicbrainzalbumid')
+            rpc.add_property('musicbrainzartistid')
+            rpc.add_property('musicbrainzalbumartistid')
+            rpc.add_property('file')
+            rpc.add_property('duration')
+            rpc.add_property('artist')
+            rpc.add_property('albumartist')
+            rpc.add_property('album')
+            rpc.add_property('genreid')
+            rpc.add_param('allroles', True)
+            if kodi_filter:
+                rpc.filter = kodi_filter
+            response = rpc.execute()
+            self.core.log.debug(str(response))
+            if "songs" in response['result']:
+                genre_ids = []
+                for song_data in response['result']['songs']:
+                    for genre_id in song_data['genreid']:
                         genre_ids.append(genre_id)
                 self.assure_genre_ids_loaded(genre_ids)
                 for song_data in response['result']['songs']:

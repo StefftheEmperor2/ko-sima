@@ -4,6 +4,8 @@ addon:
 	mkdir ./dist/service.ko-sima
 	rsync -r --exclude '.git' \
 	--exclude=".idea" \
+	--exclude=".gitignore" \
+	--exclude=".gitmodules" \
 	--exclude="dist" \
 	--exclude="README.md" \
 	--exclude="Makefile" \
