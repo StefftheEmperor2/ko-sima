@@ -157,6 +157,7 @@ class PlayerClient(MPD):
 
     def kodi_find(self, what, mpd_filter=None):
         if what == 'artist':
+            # web_pdb.set_trace()
             return self.find_tracks_by_artist(mpd_filter)
         if mpd_filter is None:
             return self.find_tracks_by_filter(what)
@@ -534,88 +535,6 @@ class PlayerClient(MPD):
     def diff(first, second):
         second = set(second)
         return [item for item in first if item not in second]
-    #
-    # def find_tracks(self, artist):
-    #     search_more = True
-    #     page = 0
-    #     songs = []
-    #     web_pdb.set_trace()
-    #     while search_more:
-    #         page = page + 1
-    #         rpc = RPC(self.core, 'AudioLibrary.GetSongs', 'libSongs')
-    #         rpc.set_page(page)
-    #         rpc.set_sort_field('title')
-    #         rpc.add_property('title')
-    #         rpc.add_property('musicbrainztrackid')
-    #         rpc.add_property('musicbrainzalbumid')
-    #         rpc.add_property('musicbrainzartistid')
-    #         rpc.add_property('musicbrainzalbumartistid')
-    #         rpc.add_property('file')
-    #         rpc.add_property('duration')
-    #         rpc.add_property('artist')
-    #         rpc.add_property('albumartist')
-    #         rpc.add_property('album')
-    #         rpc.add_property('genreid')
-    #         rpc.add_param('allroles', True)
-    #         rpc.set_filter(
-    #             ComplexFilter()
-    #             .set_operator_or()
-    #             .add_compound(
-    #                 SimpleFilter('artist', SimpleFilter.OPERATOR_IS, artist.name)
-    #             )
-    #             .add_compound(
-    #                 SimpleFilter('albumartist', SimpleFilter.OPERATOR_IS, artist.name)
-    #             )
-    #         )
-    #         response = rpc.execute()
-    #         self.core.log.debug(str(response))
-    #         if "songs" in response['result']:
-    #             genre_ids = []
-    #             for song in response['result']['songs']:
-    #                 for genre_id in song['genreid']:
-    #                     genre_ids.append(genre_id)
-    #             self.assure_genre_ids_loaded(genre_ids)
-    #             for song in response['result']['songs']:
-    #                 songs.append(self.core.create_song_by_kodi_data(song, self.get_genres_by_ids(song['genreid'])))
-    #             rpc.set_page(page + 1)
-    #             search_more = len(response['result']['songs']) > 0 and rpc.limits.start <= \
-    #                           response['result']['limits']['total']
-    #         else:
-    #             self.core.log.warning('no more results in list')
-    #             search_more = False
-    #
-    # def search_artist(self, artist):
-    #     rpc = RPC(self.core, 'AudioLibrary.GetArtists', 1)
-    #     rpc.set_sort_field('artist')
-    #     rpc.add_property('musicbrainzartistid')
-    #     rpc.add_property('isalbumartist')
-    #     rpc.add_param('albumartistsonly', False)
-    #     rpc.limits.start = 0
-    #     rpc.limits.end = 1
-    #     filter = ComplexFilter()\
-    #         .set_operator_or()\
-    #         .add_compound(
-    #             SimpleFilter('artist', SimpleFilter.OPERATOR_IS, artist.name)
-    #         )
-    #     # if artist.mbid:
-    #     #     filter.add_compound(
-    #     #         SimpleFilter('musicbrainzartistid', SimpleFilter.OPERATOR_IS, artist.mbid)
-    #     #     )
-    #
-    #     # if artist.albumartist and artist.albumartist != artist.name:
-    #     #     filter.add_compound(
-    #     #         SimpleFilter('albumartist', SimpleFilter.OPERATOR_IS, artist.name)
-    #     #     )
-    #     rpc.set_filter(
-    #         filter
-    #     )
-    #     response = rpc.execute()
-    #     self.core.log.debug(str(response))
-    #     if "artists" in response['result']:
-    #         artist_data = next(iter(response['result']['artists'] or []), None) or None
-    #         if artist_data:
-    #             return self.core.create_artist_by_kodi_data(artist_data)
-    #     return None
 
     def get_kodi_playmode(self):
         return self.kodi_playmode
@@ -729,6 +648,17 @@ class PlayQueue(Playlist):
         if playlist_size == 0 or playlist_position == -1:
             return 0
         return self.playlist.size() - self.playlist.getposition()
+
+    def __add__(self, other):
+        if isinstance(other, list):
+            new = []
+            for item in self:
+                new.append(item)
+            for item in other:
+                new.append(item)
+            return new
+        else:
+            raise TypeError(f'Can\'t add {type(self)} and {type(other)}')
 
 
 class PlayerError(BaseException):
