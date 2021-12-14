@@ -31,6 +31,8 @@ class RPC:
             return True
         if self.method == 'AudioLibrary.GetSongs':
             return True
+        if self.method == 'Playlist.GetItems':
+            return True
 
         return False
 
@@ -65,6 +67,10 @@ class RPC:
             params['properties'] = self.properties
         return params
 
+    def set_limits(self, start, end):
+        self.limits.set_start(start)
+        self.limits.set_end(end)
+
     def __str__(self):
         payload = {
             "jsonrpc": "2.0",
@@ -86,8 +92,8 @@ class RPC:
 class Limits:
     def __init__(self):
         self.start = 0
-        self.end = 99
-        self.page_size = 100
+        self.end = 2999
+        self.page_size = 3000
         self.page = 1
 
     def set_start(self, start):

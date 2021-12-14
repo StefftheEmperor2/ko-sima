@@ -93,17 +93,23 @@ class KoSima:
         self.xbmc_monitor = xbmc.Monitor()
         self.is_exiting = False
 
-    def get_item_as_track(self, music_info):
-        track = Track(file=music_info.getURL(), duration=music_info.getDuration())
-        track.artist = music_info.getArtist()
-        track.title = music_info.getTitle()
-        track.album = music_info.getAlbum()
-        track.albumartist = music_info.getAlbumArtist()
-        track.genre = music_info.getGenre()
-        track.musicbrainz_artistid = music_info.getMusicBrainzArtistID()
-        track.musicbrainz_albumartistid = music_info.getMusicBrainzAlbumArtistID()
-        track.musicbrainz_albumid = music_info.getMusicBrainzAlbumID()
-        track.musicbrainz_trackid = music_info.getMusicBrainzTrackID()
+    def get_item_as_track(self, music_info, pos=None):
+        kwargs = {
+            'artist': music_info.getArtist(),
+            'title': music_info.getTitle(),
+            'file': music_info.getURL(),
+            'duration': music_info.getDuration(),
+            'album': music_info.getAlbum(),
+            'albumartist': music_info.getAlbumArtist(),
+            'genre': music_info.getGenre(),
+            'musicbrainz_artistid': music_info.getMusicBrainzArtistID(),
+            'musicbrainz_albumartistid': music_info.getMusicBrainzAlbumArtistID(),
+            'musicbrainz_albumid': music_info.getMusicBrainzAlbumID(),
+            'musicbrainz_trackid': music_info.getMusicBrainzTrackID(),
+            'pos': -1 if pos is None else pos
+        }
+
+        track = Track(**kwargs)
         return track
 
     def create_artist_by_kodi_data(self, kodi_data):
@@ -208,7 +214,6 @@ class KoSima:
                 sorted(self._plugins, key=lambda pl: pl[0], reverse=True)]
 
     def get_plugins(self, source):
-        web_pdb.set_trace()
         if source == 'internal':
             return ['Crop', 'Genre', 'Tags', 'Lastfm', 'Random']
         if source == 'contrib':
@@ -323,23 +328,25 @@ class KoSima:
         self._plugins = new_plugins
 
     def reload_config(self):
-        web_pdb.set_trace()
         plugins_to_enable = []
         plugins_to_disable = []
         enabled_plugins = []
+        #web_pdb.set_trace()
         for plugin in self.plugins:
-            if not self.config.get_kodi_setting_bool(f'sima.plugin.{plugin.lower()}.enabled'):
-                plugins_to_disable.append(plugin)
             enabled_plugins.append(plugin)
 
         for source, plugin in self.available_plugins:
             plugin_name = plugin.lower()
+            plugin_object = self.get_plugin_by_identifier_from_list((source, plugin,), enabled_plugins)
+            if plugin_object:
+                plugins_to_disable.append(plugin_object)
+
             if self.config.get_kodi_setting_bool(f'sima.plugin.{plugin_name}.enabled'):
-                if self.get_plugin_by_identifier_from_list((source, plugin,), enabled_plugins):
-                    plugins_to_disable.append(plugin)
                 plugins_to_enable.append((source, plugin))
 
         for plugin in plugins_to_disable:
+            plugin_name = plugin.info()['name']
+            self.log.debug(f'shutting down plugin: {plugin_name}')
             plugin.shutdown()
             self.remove_plugin(plugin)
 
@@ -347,9 +354,18 @@ class KoSima:
             if not self.get_plugin_by_identifier_from_list((source, plugin,), self.loaded_plugins):
                 load_plugin(self, source, plugin)
             plugin_object = self.get_plugin_by_identifier_from_list((source, plugin,), self.loaded_plugins)
+            self.log.debug(f'starting up plugin: {plugin}')
             plugin_object.start()
             prio = int(plugin_object.priority)
-            self._plugins.append((prio, plugin_object,))
+            self.assure_plugin_in_list(prio, plugin_object)
+
+        self.log.info('Reloaded plugins: %s', ' > '.join(map(str, self.plugins)))
+
+    def assure_plugin_in_list(self, prio, plugin_object):
+        for stored_prio, stored_plugin_object in self._plugins:
+            if plugin_object is stored_plugin_object:
+                return
+        self._plugins.append((prio, plugin_object,))
 
     def loop(self):
         """Dispatching callbacks to plugins

@@ -15,6 +15,10 @@ class MPDClient:
         raise StubException(item)
 
 
+class CommandError(BaseException):
+    pass
+
+
 class PlayerError:
     pass
 

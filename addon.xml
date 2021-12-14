@@ -9,4 +9,8 @@
     <platform>all</platform>
     <summary lang="en">Ko-Sima can queue track, top track or whole album for similar artists. This client allows you to never run out of music when your playlist queue is getting short.</summary>
   </extension>
+  <assets>
+    <icon>resources/icon.png</icon>
+    <fanart>resources/fanart.png</fanart>
+  </assets>
 </addon>

@@ -14,7 +14,7 @@ class Config:
             "genre": GenreConfigSection(self),
             "lastfm": LastFMConfigSection(self),
             "random": RandomConfigSection(self),
-            "Tags": ConfigSection(self),
+            "tags": TagsConfigSection(self),
             "sima": CoreConfigSection(self)
         }
 
@@ -64,18 +64,24 @@ class Config:
 class ConfigSection:
     def __init__(self, config):
         self.config = config
-        self.items = {}
+        self._items = {}
 
     def __contains__(self, item):
-        return item in self.items
+        return item in self._items
 
     def __getitem__(self, item):
-        if isinstance(self.items[item], DeferredConfig):
-            return self.items[item].get_value()
-        return self.items[item]
+        if isinstance(self._items[item], DeferredConfig):
+            return self._items[item].get_value()
+        return self._items[item]
 
     def __setitem__(self, key, value):
-        self.items[key] = value
+        self._items[key] = value
+
+    def items(self):
+        return [(k, self.__getitem__(k)) for k in self._items.keys()]
+
+    def keys(self):
+        return self._items.keys()
 
     def getint(self, key):
         return int(self.get(key))
@@ -89,6 +95,9 @@ class ConfigSection:
         except KeyError:
             return default_value
 
+    def register(self, key, value):
+        self._items[key] = value
+
 
 class CoreConfigSection(ConfigSection):
     def __init__(self, config):
@@ -97,13 +106,36 @@ class CoreConfigSection(ConfigSection):
         cache_dir = path.join(var_dir, 'http', 'LastFM')
         if not xbmcvfs.exists(path.join(cache_dir, '')):
             xbmcvfs.mkdirs(cache_dir)
-        self.items['var_dir'] = var_dir
+        self.register('var_dir', var_dir)
+
+
+class TagsConfigSection(ConfigSection):
+    def __init__(self, config):
+        super(TagsConfigSection, self).__init__(config)
+        self.register('comment', DeferredConfig(config, 'sima.plugin.tags.comment', str))
+        self.register('date', DeferredConfig(config, 'sima.plugin.tags.date', str))
+        self.register('genre', DeferredConfig(config, 'sima.plugin.tags.genre', str))
+        self.register('label', DeferredConfig(config, 'sima.plugin.tags.label', str))
+        self.register('originaldate', DeferredConfig(config, 'sima.plugin.tags.originaldate', str))
+        self.register('filter', DeferredConfig(config, 'sima.plugin.tags.filter', str))
+        self.register('queue_mode', DeferredConfig(
+            config,
+            'sima.plugin.tags.queue_mode',
+            DeferredConfigEnumMapping({
+                32047: 'track',
+                32048: 'album'
+            })
+        ))
+        self.register('single_album', DeferredConfig(config, 'sima.plugin.tags.single_album', bool))
+        self.register('track_to_add', DeferredConfig(config, 'sima.plugin.tags.track_to_add', int))
+        self.register('album_to_add', DeferredConfig(config, 'sima.plugin.tags.album_to_add', int))
+        self.register('priority', 80)
 
 
 class LastFMConfigSection(ConfigSection):
     def __init__(self, config):
         super(LastFMConfigSection, self).__init__(config)
-        self.items['queue_mode'] = DeferredConfig(
+        self.register('queue_mode', DeferredConfig(
             config,
             'sima.plugin.lastfm.queue_mode',
             DeferredConfigEnumMapping({
@@ -111,38 +143,45 @@ class LastFMConfigSection(ConfigSection):
                 32029: 'top',
                 32030: 'album'
             })
-        )
-        self.items['track_to_add'] = DeferredConfig(config, 'sima.plugin.lastfm.track_to_add', int)
-        self.items['max_art'] = DeferredConfig(config, 'sima.plugin.lastfm.max_art', int)
-        self.items['single_album'] = DeferredConfig(config, 'sima.plugin.lastfm.single_album', bool)
-        self.items['depth'] = DeferredConfig(config, 'sima.plugin.lastfm.depth', int)
+        ))
+        self.register('track_to_add', DeferredConfig(config, 'sima.plugin.lastfm.track_to_add', int))
+        self.register('album_to_add', DeferredConfig(config, 'sima.plugin.lastfm.album_to_add', int))
+        self.register('track_to_add_from_album', DeferredConfig(config, 'sima.plugin.lastfm.track_to_add_from_album', int))
+        self.register('max_art', DeferredConfig(config, 'sima.plugin.lastfm.max_art', int))
+        self.register('single_album', DeferredConfig(config, 'sima.plugin.lastfm.single_album', bool))
+        self.register('depth', DeferredConfig(config, 'sima.plugin.lastfm.depth', int))
+        self.register('priority', 100)
+
 
 class RandomConfigSection(ConfigSection):
     def __init__(self, config):
         super(RandomConfigSection, self).__init__(config)
-        self.items['track_to_add'] = DeferredConfig(config, 'sima.plugin.random.track_to_add', int)
+        self.register('track_to_add', DeferredConfig(config, 'sima.plugin.random.track_to_add', int))
+        self.register('priority', 50)
 
 
 class CropConfigSection(ConfigSection):
     def __init__(self, config):
         super(CropConfigSection, self).__init__(config)
-        self.items['consume'] = DeferredConfig(config, 'sima.plugin.crop.consume', int)
+        self.register('consume', DeferredConfig(config, 'sima.plugin.crop.consume', int))
+        self.register('priority', 0)
 
 
 class GenreConfigSection(ConfigSection):
     def __init__(self, config):
         super(GenreConfigSection, self).__init__(config)
-        self.items['queue_mode'] = DeferredConfig(
+        self.register('queue_mode', DeferredConfig(
             config,
             'sima.plugin.genre.queue_mode',
             DeferredConfigEnumMapping({
                 32011: 'track',
                 32012: 'album'
             })
-        )
-        self.items['single_album'] = DeferredConfig(config, 'sima.plugin.genre.single_album', bool)
-        self.items['track_to_add'] = DeferredConfig(config, 'sima.plugin.genre.track_to_add', int)
-        self.items['album_to_add'] = DeferredConfig(config, 'sima.plugin.genre.album_to_add', int)
+        ))
+        self.register('single_album', DeferredConfig(config, 'sima.plugin.genre.single_album', bool))
+        self.register('track_to_add', DeferredConfig(config, 'sima.plugin.genre.track_to_add', int))
+        self.register('album_to_add', DeferredConfig(config, 'sima.plugin.genre.album_to_add', int))
+        self.register('priority', 79)
 
 
 class DeferredConfigEnumMapping:

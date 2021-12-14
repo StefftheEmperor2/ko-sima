@@ -1,48 +1,285 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<settings>
-    <category label="32001">
-        <setting label="32002" type="number" id="sima.queue_length" default="10"/>
-        <setting label="32003" type="number" id="sima.history_duration" default="8"/>
-        <setting label="32004" type="bool" id="sima.musicbrainzid" default="true"/>
-        <setting label="32005" type="bool" id="sima.repeat_disable_queue" default="true"/>
-        <setting label="32006" type="bool" id="sima.single_disable_queue" default="true"/>
-    </category>
-    <category label="32007">
-        <setting label="32008" type="lsep"/>
-        <setting label="32009" type="bool" id="sima.plugin.genre.enabled" default="false"/>
-        <setting label="32010" type="labelenum" id="sima.plugin.genre.queue_mode" lvalues="32011|32012" default="32011"/>
-        <setting label="32013" type="bool" id="sima.plugin.genre.single_album" default="false"/>
-        <setting label="32014" type="number" id="sima.plugin.genre.track_to_add" default="1"/>
-        <setting label="32015" type="number" id="sima.plugin.genre.album_to_add" default="1"/>
-        <setting label="32016" type="lsep"/>
-        <setting label="32017" type="bool" id="sima.plugin.crop.enabled" default="false"/>
-        <setting label="32018" type="number" id="sima.plugin.crop.consume" default="10"/>
-        <setting label="32019" type="lsep"/>
-        <setting label="32020" type="bool" id="sima.plugin.random.enabled" default="false"/>
-        <setting label="32021" type="labelenum" id="sima.plugin.random.flavour" lvalues="32022|32023"/>
-        <setting label="32024" type="number" id="sima.plugin.random.track_to_add" default="1"/>
-        <setting label="32025" type="lsep"/>
-        <setting label="32039" type="bool" id="sima.plugin.tags.enabled" default="false"/>
-        <setting label="32040" type="text" id="sima.plugin.tags.comment" />
-        <setting label="32041" type="text" id="sima.plugin.tags.date" />
-        <setting label="32042" type="text" id="sima.plugin.tags.genre" />
-        <setting label="32043" type="text" id="sima.plugin.tags.label" />
-        <setting label="32044" type="text" id="sima.plugin.tags.originaldate" />
-        <setting label="32045" type="text" id="sima.plugin.tags.filter" />
-        <setting label="32046" type="labelenum" id="sima.plugin.tags.queue_mode" lvalues="32047|32048" default="32047"/>
-        <setting label="32049" type="bool" id="sima.plugin.tags.single_album" default="false"/>
-        <setting label="32050" type="number" id="sima.plugin.tags.track_to_add" default="1"/>
-        <setting label="32051" type="number" id="sima.plugin.tags.album_to_add" default="1"/>
-        <setting label="32025" type="lsep"/>
-        <setting label="32026" type="bool" id="sima.plugin.lastfm.enabled" default="false"/>
-        <setting label="32027" type="labelenum" id="sima.plugin.lastfm.queue_mode" lvalues="32028|32029|32030" default="32029"/>
-        <setting label="32031" type="number" id="sima.plugin.lastfm.max_art" default="20"/>
-        <setting label="32032" type="number" id="sima.plugin.lastfm.depth" default="1"/>
-        <setting label="32033" type="bool" id="sima.plugin.lastfm.single_album" default="false"/>
-        <setting label="32034" type="number" id="sima.plugin.lastfm.track_to_add" default="1"/>
-        <setting label="32035" type="number" id="sima.plugin.lastfm.album_to_add" default="1"/>
-        <setting label="32036" type="number" id="sima.plugin.lastfm.track_to_add_from_album" default="1"/>
-        <setting label="32037" type="bool" id="sima.plugin.lastfm.shuffle_album" default="false"/>
-        <setting label="32038" type="bool" id="sima.plugin.lastfm.cache" default="true"/>
-    </category>
+<settings version="1">
+    <section id="service.ko-sima">
+        <category id="core" label="32001">
+            <group id="sima.core" label="">
+                <setting label="32002" type="integer" id="sima.queue_length">
+                    <level>0</level>
+                    <default>10</default>
+                    <control type="edit" format="integer">
+                        <heading>32002</heading>
+                    </control>
+                </setting>
+                <setting label="32003" type="integer" id="sima.history_duration">
+                    <level>0</level>
+                    <default>8</default>
+                    <control type="edit" format="integer">
+                        <heading>32003</heading>
+                    </control>
+                </setting>
+                <setting label="32004" type="boolean" id="sima.musicbrainzid">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting label="32005" type="boolean" id="sima.repeat_disable_queue">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting label="32006" type="boolean" id="sima.single_disable_queue">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting label="32053" type="boolean" id="sima.party_mode_disable_queue">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+            </group>
+        </category>
+        <category id="plugins" label="32007">
+            <group id="sima.plugin.genre" label="32008">
+                <setting label="32009" type="boolean" id="sima.plugin.genre.enabled">
+                    <level>0</level>
+                    <default>false</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting label="32010" type="string" id="sima.plugin.genre.queue_mode">
+                    <level>0</level>
+                    <default>32011</default>
+                    <constraints>
+                        <options>
+                            <option label="32011">32011</option>
+                            <option label="32012">32012</option>
+                        </options>
+                        <allowempty>false</allowempty>
+                    </constraints>
+                    <control type="spinner" format="string"/>
+                </setting>
+                <setting label="32013" type="boolean" id="sima.plugin.genre.single_album">
+                    <level>0</level>
+                    <default>false</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting label="32014" type="integer" id="sima.plugin.genre.track_to_add">
+                    <level>0</level>
+                    <default>1</default>
+                    <control type="edit" format="integer">
+		                <heading>32014</heading>
+	                </control>
+                </setting>
+                <setting label="32015" type="integer" id="sima.plugin.genre.album_to_add">
+                    <level>0</level>
+                    <default>1</default>
+                    <control type="edit" format="integer">
+		                <heading>32015</heading>
+	                </control>
+                </setting>
+            </group>
+            <group label="32016" id="sima.plugin.crop">
+                <setting label="32017" type="boolean" id="sima.plugin.crop.enabled">
+                    <level>0</level>
+                    <default>false</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting label="32018" type="integer" id="sima.plugin.crop.consume">
+                    <level>0</level>
+                    <default>10</default>
+                    <control type="edit" format="integer">
+		                <heading>32018</heading>
+	                </control>
+                </setting>
+            </group>
+            <group label="32019" id="sima.plugin.random">
+                <setting label="32020" type="boolean" id="sima.plugin.random.enabled">
+                    <level>0</level>
+                    <default>false</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting label="32021" type="string" id="sima.plugin.random.flavour">
+                    <level>0</level>
+                    <default>32022</default>
+                    <constraints>
+                        <options>
+                            <option label="32022">32022</option>
+                            <option label="32023">32023</option>
+                        </options>
+                        <allowempty>false</allowempty>
+                    </constraints>
+                    <control type="spinner" format="string"/>
+                </setting>
+                <setting label="32024" type="integer" id="sima.plugin.random.track_to_add">
+                    <level>0</level>
+                    <default>1</default>
+                    <control type="edit" format="integer">
+		                <heading>32024</heading>
+	                </control>
+                </setting>
+            </group>
+            <group label="32052" id="sima.plugin.tags">
+                <setting label="32039" type="boolean" id="sima.plugin.tags.enabled">
+                    <level>0</level>
+                    <default>false</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting label="32040" type="string" id="sima.plugin.tags.comment">
+                    <level>0</level>
+                    <constraints>
+		                <allowempty>true</allowempty>
+                    </constraints>
+                    <control type="edit" format="string">
+                        <heading>32040</heading>
+                    </control>
+                </setting>
+                <setting label="32041" type="string" id="sima.plugin.tags.date">
+                    <level>0</level>
+                    <constraints>
+		                <allowempty>true</allowempty>
+                    </constraints>
+                    <control type="edit" format="string">
+                        <heading>32041</heading>
+                    </control>
+                </setting>
+                <setting label="32042" type="string" id="sima.plugin.tags.genre">
+                    <level>0</level>
+                    <constraints>
+		                <allowempty>true</allowempty>
+                    </constraints>
+                    <control type="edit" format="string">
+                        <heading>32042</heading>
+                    </control>
+                </setting>
+                <setting label="32043" type="string" id="sima.plugin.tags.label">
+                    <level>0</level>
+                    <constraints>
+		                <allowempty>true</allowempty>
+                    </constraints>
+                    <control type="edit" format="string">
+                        <heading>32043</heading>
+                    </control>
+                </setting>
+                <setting label="32044" type="string" id="sima.plugin.tags.originaldate">
+                    <level>0</level>
+                    <constraints>
+		                <allowempty>true</allowempty>
+                    </constraints>
+                    <control type="edit" format="string">
+                        <heading>32044</heading>
+                    </control>
+                </setting>
+                <setting label="32045" type="string" id="sima.plugin.tags.filter">
+                    <level>0</level>
+                    <constraints>
+		                <allowempty>true</allowempty>
+                    </constraints>
+                    <control type="edit" format="string">
+                        <heading>32045</heading>
+                    </control>
+                </setting>
+                <setting label="32046" type="string" id="sima.plugin.tags.queue_mode">
+                    <level>0</level>
+                    <default>32047</default>
+                    <constraints>
+                        <options>
+                            <option label="32047">32047</option>
+                            <option label="32048">32048</option>
+                        </options>
+                        <allowempty>false</allowempty>
+                    </constraints>
+                    <control type="spinner" format="string"/>
+                </setting>
+                <setting label="32049" type="boolean" id="sima.plugin.tags.single_album">
+                    <level>0</level>
+                    <default>false</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting label="32050" type="integer" id="sima.plugin.tags.track_to_add">
+                    <level>0</level>
+                    <default>1</default>
+                    <control type="edit" format="integer">
+		                <heading>32050</heading>
+	                </control>
+                </setting>
+                <setting label="32051" type="integer" id="sima.plugin.tags.album_to_add">
+                    <level>0</level>
+                    <default>1</default>
+                    <control type="edit" format="integer">
+		                <heading>32051</heading>
+	                </control>
+                </setting>
+            </group>
+            <group label="32025" id="sima.plugin.lastfm">
+                <setting label="32026" type="boolean" id="sima.plugin.lastfm.enabled">
+                    <level>0</level>
+                    <default>false</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting label="32027" type="string" id="sima.plugin.lastfm.queue_mode">
+                    <level>0</level>
+                    <default>32029</default>
+                    <constraints>
+                        <options>
+                            <option label="32028">32028</option>
+                            <option label="32029">32029</option>
+                            <option label="32030">32030</option>
+                        </options>
+                        <allowempty>false</allowempty>
+                    </constraints>
+                    <control type="spinner" format="string"/>
+                </setting>
+                <setting label="32031" type="integer" id="sima.plugin.lastfm.max_art">
+                    <level>0</level>
+                    <default>20</default>
+                    <control type="edit" format="integer">
+		                <heading>32031</heading>
+	                </control>
+                </setting>
+                <setting label="32032" type="integer" id="sima.plugin.lastfm.depth">
+                    <level>0</level>
+                    <default>1</default>
+                    <control type="edit" format="integer">
+		                <heading>32032</heading>
+	                </control>
+                </setting>
+                <setting label="32033" type="boolean" id="sima.plugin.lastfm.single_album">
+                    <level>0</level>
+                    <default>false</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting label="32034" type="integer" id="sima.plugin.lastfm.track_to_add">
+                    <level>0</level>
+                    <default>1</default>
+                    <control type="edit" format="integer">
+		                <heading>32034</heading>
+	                </control>
+                </setting>
+                <setting label="32035" type="integer" id="sima.plugin.lastfm.album_to_add">
+                    <level>0</level>
+                    <default>1</default>
+                    <control type="edit" format="integer">
+		                <heading>32035</heading>
+	                </control>
+                </setting>
+                <setting label="32036" type="integer" id="sima.plugin.lastfm.track_to_add_from_album">
+                    <level>0</level>
+                    <default>1</default>
+                    <control type="edit" format="integer">
+		                <heading>32036</heading>
+	                </control>
+                </setting>
+                <setting label="32037" type="boolean" id="sima.plugin.lastfm.shuffle_album">
+                    <level>0</level>
+                    <default>false</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting label="32038" type="boolean" id="sima.plugin.lastfm.cache">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+            </group>
+        </category>
+    </section>
 </settings>

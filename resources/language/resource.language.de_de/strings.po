@@ -41,7 +41,7 @@ msgstr "Einzelliedwiederholung deaktiviert Einreihen"
 
 msgctxt "#32007"
 msgid "plugins"
-msgstr "Plugin-Einstellugnen"
+msgstr "Plugin-Einstellungen"
 
 msgctxt "#32008"
 msgid "sima.plugin.genre"
@@ -219,3 +219,11 @@ msgstr "Anzahl der hinzuzufügenden Lieder"
 msgctxt "#32051"
 msgid "sima.plugin.tags.album_to_add"
 msgstr "Anzahl der zu holenden Alben"
+
+msgctxt "#32052"
+msgid "sima.plugin.tags"
+msgstr "Tags"
+
+msgctxt "#32053"
+msgid "sima.party_mode_disable_queue""
+msgstr "Party-mode deaktiviert Einreihen"
