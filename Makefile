@@ -1,8 +1,10 @@
 addon:
-	if [ -f ko_sima.zip ]; then rm ko_sima.zip; fi
-	zip -9 -r ko_sima.zip . \
-	--exclude=".git*" \
-	--exclude=".idea*" \
+	if [ -f service.ko-sima.zip ]; then rm service.ko-sima.zip; fi
+	rm -rf ./dist/service.ko-sima
+	mkdir ./dist/service.ko-sima
+	rsync -r --exclude '.git' \
+	--exclude=".idea" \
+	--exclude="dist" \
 	--exclude="README.md" \
 	--exclude="Makefile" \
 	--exclude="resources/lib/mpd-sima/data*" \
@@ -18,5 +20,11 @@ addon:
 	--exclude="resources/lib/mpd-sima/.gitlab-ci.yml" \
 	--exclude="resources/lib/mpd-sima/setup.py" \
 	--exclude="resources/lib/mpd-sima/setup.cfg" \
+	. \
+	./dist/service.ko-sima/
+	cd ./dist \
+	&& zip -9 -r service.ko-sima.zip ./service.ko-sima \
+	&& cd ..
+
 
 
