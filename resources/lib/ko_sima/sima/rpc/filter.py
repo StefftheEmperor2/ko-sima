@@ -1,6 +1,4 @@
 import re
-import web_pdb
-
 
 class ComplexFilter:
     OPERATOR_AND = 'and'
@@ -289,7 +287,6 @@ class FilterParser:
         if isinstance(current_filter, SimpleFilter):
             artist_data_field = self.get_artist_data_field(current_filter.field)
             if not artist_data_field:
-                web_pdb.set_trace()
                 raise ArtistFieldUnsupportedException(current_filter.field)
             if artist_data_field in self.UNPACKING_NEEDING_ARTIST_FIELDS:
                 artist_field_value = next(iter(artist_data[artist_data_field] or []), None)
@@ -321,7 +318,6 @@ class FilterParser:
         if isinstance(current_filter, SimpleFilter):
             album_data_field = self.get_album_data_field(current_filter.field)
             if not album_data_field:
-                web_pdb.set_trace()
                 raise AlbumFieldUnsupportedException(current_filter.field)
             if album_data_field in self.UNPACKING_NEEDING_ALBUM_FIELDS:
                 album_field_value = next(iter(album_data[album_data_field] or []), None)
@@ -347,7 +343,6 @@ class FilterParser:
         if isinstance(current_filter, SimpleFilter):
             song_data_field = self.get_song_data_field(current_filter.field)
             if not song_data_field:
-                web_pdb.set_trace()
                 raise ArtistFieldUnsupportedException(current_filter.field)
             if song_data_field in self.UNPACKING_NEEDING_SONG_FIELDS:
                 song_field_value = next(iter(song_data[song_data_field] or []), None)
