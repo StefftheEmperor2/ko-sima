@@ -1,7 +1,7 @@
 import xbmc
 import json
 from .filter import SimpleFilter, ComplexFilter
-import web_pdb
+
 
 class RPC:
     def __init__(self, core, method, request_id):

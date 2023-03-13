@@ -2,7 +2,6 @@ import xbmcaddon
 import xbmcvfs
 from os import path
 
-import web_pdb
 
 class Config:
     def __init__(self, core):

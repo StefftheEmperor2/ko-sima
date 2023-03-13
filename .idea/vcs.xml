@@ -2,10 +2,6 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/dist/service-ko-sima" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/dist/service-ko-sima/dist/service-ko-sima" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/dist/service-ko-sima/dist/service-ko-sima/resources/lib/mpd-sima" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/dist/service-ko-sima/resources/lib/mpd-sima" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/resources/lib/mpd-sima" vcs="Git" />
   </component>
 </project>

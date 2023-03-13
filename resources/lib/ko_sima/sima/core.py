@@ -13,7 +13,6 @@ from collections import deque
 from .log import Log
 from .config import Config
 from .mpd_stubs.musicpd import Track as MPDTrack
-import web_pdb
 from . import load_sima, load_musicpd
 load_sima()
 load_musicpd()
@@ -331,7 +330,6 @@ class KoSima:
         plugins_to_enable = []
         plugins_to_disable = []
         enabled_plugins = []
-        #web_pdb.set_trace()
         for plugin in self.plugins:
             enabled_plugins.append(plugin)
 

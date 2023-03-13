@@ -1,6 +1,6 @@
 import xbmc
 import collections.abc
-import web_pdb
+
 
 class Log:
     def trace(self, message, *args):

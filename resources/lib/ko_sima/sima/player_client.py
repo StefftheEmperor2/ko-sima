@@ -6,7 +6,6 @@ load_sima()
 load_musicpd()
 from sima.mpdclient import MPD
 from sima.lib.track import Track
-import web_pdb
 
 
 class PlayerClient(MPD):
@@ -157,7 +156,6 @@ class PlayerClient(MPD):
 
     def kodi_find(self, what, mpd_filter=None):
         if what == 'artist':
-            # web_pdb.set_trace()
             return self.find_tracks_by_artist(mpd_filter)
         if mpd_filter is None:
             return self.find_tracks_by_filter(what)
@@ -166,7 +164,6 @@ class PlayerClient(MPD):
                 return self.find_tracks_by_musicbrainz_artist_id(mpd_filter)
             else:
                 return []
-        web_pdb.set_trace()
 
     def find_tracks_by_artist(self, artist):
         search_more = True
@@ -346,7 +343,6 @@ class PlayerClient(MPD):
             return self.list_music_brainz_artist_ids(filter_condition)
         if subject == 'MUSICBRAINZ_ALBUMID' or subject == 'musicbrainz_albumid':
             return self.list_music_brainz_album_ids(filter_condition)
-        web_pdb.set_trace()
 
     def list_artists(self, filter_condition=None):
         search_more = True
@@ -636,7 +632,6 @@ class PlayQueue(Playlist):
         playlist_position = max(self.playlist.getposition(), 0)
         if item < 0:
             item = len(self) + item
-        #web_pdb.set_trace()
         self.core.log.debug('getting item %s of %s from queue', item + 1, len(self))
         if len(self) < item + 1:
             raise IndexError
